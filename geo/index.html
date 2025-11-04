@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Мой маршрут — Leaflet + Geolocation + Storage</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <style>
+    :root { --bg:#0b1220; --fg:#e8edf7; --muted:#9fb0d1; --card:#111a2e; --accent:#4fa3ff; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial,sans-serif; color:var(--fg); background:linear-gradient(180deg,#0a1020 0%,#0b1328 100%); }
+    header { padding:20px 16px; border-bottom:1px solid #1e2a44; background:#0b1220d9; position:sticky; top:0; backdrop-filter: blur(6px); }
+    h1 { margin:0; font-size:1.1rem; letter-spacing:.2px; }
+    main { max-width:1100px; margin:24px auto; padding:0 16px 40px; display:grid; gap:16px; grid-template-columns:1.1fr .9fr; }
+    @media (max-width:960px){ main { grid-template-columns:1fr; } }
+    .card { background:#111a2e; border:1px solid #1e2a44; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+    .card .body { padding:16px; }
+    .card h2 { margin:0 0 8px; font-size:1rem; color:var(--muted); }
+    .controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+    .controls input[type="text"] { flex:1 1 260px; min-width:200px; background:#0b152b; color:var(--fg); border:1px solid #223053; border-radius:10px; padding:10px 12px; outline:none; }
+    .btn { appearance:none; border:none; background:var(--accent); color:#071629; padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer; transition:transform .05s, box-shadow .2s; box-shadow:0 6px 16px rgba(79,163,255,.3); }
+    .btn:hover { transform:translateY(-1px); }
+    .btn.ghost { background:transparent; color:var(--fg); border:1px solid #2a3a62; box-shadow:none; }
+    .map-wrap { border-top-left-radius:16px; border-top-right-radius:16px; overflow:hidden; }
+    #leaflet-map { width:100%; height:480px; background:#0b152b; }
+    .list { max-height:560px; overflow:auto; border-radius:12px; border:1px solid #1e2a44; background:#0b152b; }
+    .item { display:flex; justify-content:space-between; gap:10px; padding:12px; border-bottom:1px solid #1a2745; cursor:pointer; }
+    .item:hover { background:#0e1a33; }
+    .item strong { color:#d9e5ff; }
+    .empty { padding:14px; color:var(--muted); }
+    .status { min-height:22px; color:var(--muted); font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Мой маршрут · Клик по карте и геолокация · localStorage</h1>
+  </header>
+
+  <main>
+    <!-- Левая колонка: карта и управление -->
+    <section class="card" aria-labelledby="map-title">
+      <div class="map-wrap">
+        <div id="leaflet-map" title="Интерактивная карта"></div>
+      </div>
+
+      <div class="body">
+        <h2 id="map-title">Карта и управление</h2>
+
+        <div class="controls" style="margin-bottom:10px">
+          <button class="btn" id="btn-current" type="button">➕ Добавить текущее место</button>
+          <button class="btn ghost" id="btn-permission" type="button">Проверить доступ к геолокации</button>
+        </div>
+
+        <div class="controls" style="margin:6px 0 10px">
+          <input id="place-name" type="text" placeholder="Название (необязательно): «Дом», «Кампус», …" />
+          <button class="btn ghost" id="btn-clear" type="button">🗑 Очистить историю</button>
+        </div>
+
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Правая колонка: история -->
+    <aside class="card" aria-labelledby="history-title">
+      <div class="body">
+        <h2 id="history-title">История мест</h2>
+      </div>
+      <div id="history" class="list" role="list" aria-describedby="history-help"></div>
+      <div class="body">
+        <p id="history-help" class="empty">Клик по записи покажет её на карте. Данные хранятся в <code>localStorage</code> .</p>
+      </div>
+    </aside>
+
+  <section aria-labelledby="meter-title">
+    <label for="place-meter">Количество сохраненных мест</label>
+    <meter id="place-meter" min="0" max="10" value="0"></meter>
+  <section>
+
+
+
+  <script>
+function updateMeter() {
+  const count = loadPlaces().length;
+  const meter = document.getElementById('place-meter');
+  if (!meter) return;
+  meter.value = count;
+  meter.max = Math.max(10, count + 1); // авторасширение шкалы
+}
+
+// вызываем при загрузке
+updateMeter();
+
+// обновляем автоматически после добавления нового места
+window.addEventListener('storage', updateMeter); // если открыто несколько вкладок
+setInterval(updateMeter, 2000); // автообновление (раз в 2 секунды)
+</script>
+
+</section>
+
+  </main>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    // ========= УТИЛИТЫ =========
+    const $ = s => document.querySelector(s);
+    const statusEl = $('#status');
+    const historyEl = $('#history');
+
+    function setStatus(msg) { statusEl.textContent = msg || ''; }
+    function fmt(n) { return Number(n).toFixed(5); }
+    function escHtml(s) {
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+    }
+    // экранируем разделитель '|' в имени
+    const SEP = '|';
+    function escName(s){ return String(s).replaceAll(SEP,'‖'); }
+    function unescName(s){ return String(s).replaceAll('‖',SEP); }
+
+    // ========= ХРАНЕНИЕ =========
+    // формат записи: lat|lon|name|dateISO
+    const STORAGE_KEY = 'places_lines_v1';
+
+    function loadPlaces() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      return raw.split('\n').filter(Boolean).map(line => {
+        const [latS, lonS, nameS, date] = line.split(SEP);
+        const lat = Number(latS), lon = Number(lonS);
+        if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+        return { lat, lon, name: nameS ? unescName(nameS) : '', date };
+      }).filter(Boolean);
+    }
+    function savePlaces(arr) {
+      const lines = arr.map(p => [p.lat, p.lon, p.name ? escName(p.name) : '', p.date || new Date().toISOString()].join(SEP));
+      localStorage.setItem(STORAGE_KEY, lines.join('\n'));
+    }
+    function addPlace({lat, lon, name=''}) {
+      const places = loadPlaces();
+      places.push({ lat:+lat, lon:+lon, name: name.trim(), date: new Date().toISOString() });
+      savePlaces(places);
+    }
+    function clearPlaces() { localStorage.removeItem(STORAGE_KEY); }
+    function deletePlace(target) {
+      const places = loadPlaces();
+      const filtered = places.filter(p => 
+        !(p.lat === target.lat && p.lon === target.lon && p.date === target.date)
+      );
+      savePlaces(filtered);
+    }
+
+    // ========= КАРТА (Leaflet) =========
+    let map, markersLayer;
+    function initMap(lat=59.9386, lon=30.3141, zoom=12){
+      map = L.map('leaflet-map').setView([lat, lon], zoom);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19, attribution:'&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
+
+      map.on('click', e => {
+        const lat = e.latlng.lat, lon = e.latlng.lng;
+        const name = ($('#place-name').value || '').trim();
+        addPlace({ lat, lon, name });
+        addMarker(lat, lon, name);
+        renderHistory();
+        pulse(lat, lon);
+        setStatus(`Добавлено по клику: ${fmt(lat)}, ${fmt(lon)}${name ? ' · ' + name : ''}`);
+      });
+    }
+    function addMarker(lat, lon, name=''){
+      const m = L.marker([lat, lon]);
+      const label = (name ? `<strong>${escHtml(name)}</strong><br>` : '') + `${fmt(lat)}, ${fmt(lon)}`;
+      m.bindPopup(label);
+      m.addTo(markersLayer);
+    }
+    function pulse(lat, lon){
+      const c = L.circleMarker([lat, lon], { radius:8, weight:2, opacity:0.8 });
+      c.addTo(markersLayer);
+      setTimeout(()=>markersLayer.removeLayer(c), 1200);
+    }
+    function showMap(lat, lon, announce=false){
+      if(!map) return;
+      map.setView([lat, lon], Math.max(map.getZoom(), 14));
+      pulse(lat, lon);
+      if (announce) setStatus(`Показано: ${fmt(lat)}, ${fmt(lon)}`);
+    }
+    function rebuildMarkers(){
+      markersLayer.clearLayers();
+      loadPlaces().forEach(p => addMarker(p.lat, p.lon, p.name));
+    }
+
+    // ========= ИСТОРИЯ UI =========
+    function renderHistory(){
+      const places = loadPlaces();
+      historyEl.innerHTML = '';
+      if(!places.length){
+        const div = document.createElement('div');
+        div.className = 'empty';
+        div.textContent = 'Ещё нет сохранённых мест. Кликните по карте или добавьте текущее место.';
+        historyEl.appendChild(div);
+        return;
+      }
+      rebuildMarkers();
+      [...places].reverse().forEach(p=>{
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.setAttribute('role','listitem');
+        const title = (p.name ? `${p.name} — ` : '') + `${fmt(p.lat)}, ${fmt(p.lon)}`;
+        item.innerHTML = `
+          <div>
+            <strong>${escHtml(title)}</strong>
+            <div style="color:#9fb0d1;font-size:.85rem">${new Date(p.date).toLocaleString()}</div>
+          </div>
+          <div style="display:flex; gap:6px">
+            <button class="btn ghost" type="button" data-action="show">Показать</button>
+            <button class="btn ghost" type="button" data-action="delete">🗑</button>
+          </div>`;
+        item.onclick = e => {
+          const action = e.target.dataset.action;
+          if (action === 'show') {
+            e.stopPropagation();
+            showMap(p.lat, p.lon, true);
+          } else if (action === 'delete') {
+            e.stopPropagation();
+            if (confirm(`Удалить место "${p.name || p.lat + ', ' + p.lon}"?`)) {
+              deletePlace(p);
+              renderHistory();
+              updateMeter();
+              setStatus('Место удалено.');
+            }
+          } else {
+            showMap(p.lat, p.lon, true);
+          }
+        };
+
+        item.querySelector('button').onclick = (e)=>{ e.stopPropagation(); showMap(p.lat, p.lon, true); };
+        historyEl.appendChild(item);
+      });
+
+      updateMeter();
+    }
+
+    // ========= ГЕОЛОКАЦИЯ =========
+    async function checkGeoPermission(){
+      if (!('permissions' in navigator) || !navigator.permissions.query) return 'unknown';
+      try {
+        const st = await navigator.permissions.query({ name:'geolocation' });
+        return st.state; // granted | prompt | denied
+      } catch { return 'unknown'; }
+    }
+    function addCurrentPlace(){
+      if(!navigator.geolocation){ setStatus('Геолокация не поддерживается этим браузером.'); return; }
+      setStatus('Запрашиваем координаты…');
+      navigator.geolocation.getCurrentPosition(
+        pos=>{
+          const { latitude:lat, longitude:lon } = pos.coords;
+          const name = ($('#place-name').value || '').trim();
+          addPlace({ lat, lon, name });
+          addMarker(lat, lon, name);
+          renderHistory();
+          showMap(lat, lon, true);
+          setStatus('Текущее место сохранено.');
+        },
+        err=> setStatus('Не удалось получить координаты: ' + err.message),
+        { enableHighAccuracy:true, timeout:10000, maximumAge:0 }
+      );
+    }
+
+    // ========= СОБЫТИЯ UI =========
+    $('#btn-permission').addEventListener('click', async ()=>{
+      const st = await checkGeoPermission();
+      setStatus('Статус доступа к геолокации: ' + st);
+    });
+    $('#btn-current').addEventListener('click', addCurrentPlace);
+    $('#btn-clear').addEventListener('click', ()=>{
+      if (confirm('Очистить всю историю мест?')){
+        clearPlaces(); renderHistory(); setStatus('История очищена.'); markersLayer.clearLayers();
+      }
+    });
+
+    // ========= СТАРТ =========
+    (function init(){
+      initMap(59.9386, 30.3141, 12);       // СПб как стартовая точка
+      renderHistory();
+      const last = loadPlaces().slice(-1)[0];
+      if (last){ addMarker(last.lat, last.lon, last.name || ''); showMap(last.lat, last.lon); }
+      setStatus('Готово. Кликните по карте или добавьте текущее место.');
+    })();
+  </script>
+</body>
+</html>

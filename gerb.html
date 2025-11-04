@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Документация — HeroLib</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+  <header>
+        <a href="./index.html"><strong>HeroWiki</strong></a>
+        <nav aria-label="Основная навигация">
+        <ul>
+            <li><a href="./index.html">Главная</a></li>
+            <li><a href="./bio.html">Биография</a></li>
+            <li><a href="./gallery.html">Галерея</a></li>
+            <li><a href="./facts.html">Факты / Цитаты</a></li>
+            <li><a href="./articles.html">Статьи</a></li>
+            <li><a href="./media.html">Медиа</a></li>
+            <li><a href="./gerb.html" aria-current="page">Герб</a></li>
+            <li><a href="./feedback.html">Обратная связь</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+        </ul>
+        </nav>
+    </header>
+
+<!-- Файл: assets/img/emblem.svg -->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="400" height="300"
+  viewBox="0 0 400 300"
+  aria-labelledby="title desc" role="img">
+
+  <!-- Доступность: заголовок и описание для скринридеров -->
+  <title id="title">Эмблема героя</title>
+  <desc id="desc">Щит с символом и подписью имени героя снизу. Цвета и формы можно менять.</desc>
+
+  <!-- ====== ПАЛИТРА И ЗАГОТОВКИ (меняйте на свои) ====== -->
+  <defs>
+    <!-- Градиент для фона -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <!-- верх/низ: поменяйте stop-color под стиль героя -->
+      <stop offset="0%"  stop-color="#c0c0c0c0"/> <!-- #0f172a -->
+      <stop offset="100%" stop-color="#bbb"/> <!-- #111827 -->
+    </linearGradient>
+
+    <!-- Градиент для щита -->
+    <linearGradient id="crestGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+
+    <!-- Сверкающее «сияние» -->
+    <radialGradient id="glow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.6)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+
+    <!-- Символ-молния как символ (можно переиспользовать <use>) -->
+    <symbol id="icon-lightning" viewBox="0 0 100 140">
+      <!-- Форма молнии: меняйте точки под свой стиль -->
+      <path d="M50 0 L150 140" />
+    </symbol>
+
+    <!-- Форма звезды (альтернатива молнии) -->
+    <symbol id="icon-star" viewBox="0 0 100 100">
+      <path d="M50 0 L61 35 L98 38 L69 60 L79 96 L50 77 L21 96 L31 60 L2 38 L39 35 Z" />
+    </symbol>
+  </defs>
+
+  <!-- ====== ФОН ====== -->
+  <!-- Можно заменить на однотонный fill="#0b1220" -->
+  <rect x="0" y="0" width="400" height="300" fill="url(#bg)"/>
+
+  <!-- Слабое свечение по центру-->
+  <ellipse cx="200" cy="120" rx="160" ry="90" fill="url(#glow)"/>
+
+  <!-- ====== ГРУППА ЭМБЛЕМЫ (перемещайте целиком) ====== -->
+  <g id="emblem" transform="translate(0,0)">
+    <!-- Щит / герб (многоугольник).  -->
+    <polygon
+      points="200,30 325,115 280,255 120,255 75,115"
+      fill="url(#crestGrad)"
+      stroke="#e5e7eb" stroke-width="4" />
+
+    <!-- Внутренняя «подложка» щита для объёма -->
+    <polygon
+      points="200,50 309,123 270,240 130,240 91,123"
+      fill="rgba(255,255,255,0.06)" />
+
+    <!-- СИМВОЛ: ВАРИАНТ 1 — молния -->
+    <!-- <use href="#icon-lightning"
+         x="150" y="75" width="100" height="140"
+         fill="#fde047" stroke="#1f2937" stroke-width="3" /> -->
+
+    <!-- СИМВОЛ: ВАРИАНТ 2 — звезда (раскомментируйте, а молнию закомментируйте) -->
+    <use href="#icon-star"
+         x="150" y="95" width="100" height="100"
+         fill="#fbbf24" stroke="#1f2937" stroke-width="3" />
+   
+
+    <!-- ИНИЦИАЛЫ ИЛИ ЗНАК (опционально, вместо символа) 
+    <text x="200" y="165"
+          fill="#fef3c7" font-size="56" font-family="Verdana, sans-serif"
+          text-anchor="middle" letter-spacing="2">LH</text>
+    -->
+  </g>
+
+  <!-- ====== ПОДПИСЬ И ДЕВИЗ ====== -->
+  <g id="labels">
+    <!-- Имя героя -->
+    <text x="200" y="285"
+          fill="#e5e7eb" font-size="22" font-family="Verdana, sans-serif"
+          text-anchor="middle">Lightning Hero</text>
+
+    <!-- Девиз (опционально)
+    <text x="200" y="305"
+          fill="#a7f3d0" font-size="14" font-family="Georgia, serif"
+          text-anchor="middle" opacity="0.9">Semper Fortis</text>
+    -->
+  </g>
+
+  <!-- ====== ПРОСТАЯ АНИМАЦИЯ (опционально) ====== -->
+  <!-- Пульсация свечения -->
+  <animate xlink:href="#emblem"
+           attributeName="transform"
+           values="translate(0,0); translate(0,-2); translate(0,0)"
+           dur="3s" repeatCount="indefinite" />
+
+  <!-- Лёгкое «дыхание» щита -->
+  <animateTransform xlink:href="#emblem"
+                    attributeName="transform" attributeType="XML"
+                    type="scale"
+                    values="1; 1.02; 1"
+                    dur="4s" repeatCount="indefinite"
+                    additive="sum" />
+  
+</svg>
+
+
+</body>
+</html>

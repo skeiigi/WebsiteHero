@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Обратная связь — HeroWiki</title>
+  <meta name="description" content="Оставьте отзыв о герое или поделитесь своим мнением." />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Перейти к основному содержанию</a>
+
+  <header>
+    <a href="./index.html"><strong>HeroWiki</strong></a>
+    <nav aria-label="Основная навигация">
+      <ul>
+        <li><a href="./index.html">Главная</a></li>
+        <li><a href="./bio.html">Биография</a></li>
+        <li><a href="./gallery.html">Галерея</a></li>
+        <li><a href="./facts.html">Факты / Цитаты</a></li>
+        <li><a href="./articles.html">Статьи</a></li>
+        <li><a href="./media.html">Медиа</a></li>
+        <li><a href="./gerb.html">Герб</a></li>
+        <li><a href="./feedback.html" aria-current="page">Обратная связь</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <header>
+      <h1>Форма обратной связи</h1>
+      <p>Поделитесь своим мнением о герое, оставьте отзыв или оцените его вклад.</p>
+    </header>
+
+    <form action="#" method="post" autocomplete="on">
+      <fieldset>
+        <legend>Ваши данные</legend>
+
+        <label for="name">Имя:</label>
+        <input type="text" id="name" name="name" placeholder="Введите ваше имя" required minlength="2" maxlength="40" autocomplete="name" />
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="example@mail.com" required autocomplete="email" />
+      </fieldset>
+
+      <fieldset>
+        <legend>Оценка героя</legend>
+
+        <label for="rating">Ваша оценка (от 1 до 10):</label>
+        <input type="number" id="rating" name="rating" min="1" max="10" value="8" required />
+
+        <p>Кто, по вашему мнению, лучший герой?</p>
+        <input list="heroes" name="favoriteHero" id="favoriteHero" placeholder="Выберите или введите имя героя" />
+        <datalist id="heroes">
+          <option value="Бэтмен">
+          <option value="Железный человек">
+          <option value="Тор">
+          <option value="Капитан Америка">
+          <option value="Доктор Стрэндж">
+        </datalist>
+
+        <p>Какой тип героев вам ближе?</p>
+        <label><input type="radio" name="heroType" value="super" required /> Супергерои</label>
+        <label><input type="radio" name="heroType" value="realistic" /> Реалистичные персонажи</label>
+        <label><input type="radio" name="heroType" value="antihero" /> Антигерои</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ваши предпочтения</legend>
+
+        <label for="universe">Любимая вселенная:</label>
+        <select id="universe" name="universe" required>
+          <optgroup label="Комиксы">
+            <option value="marvel">Marvel</option>
+            <option value="dc">DC</option>
+          </optgroup>
+          <optgroup label="Кино">
+            <option value="disney">Disney</option>
+            <option value="pixar">Pixar</option>
+            <option value="warner">Warner Bros</option>
+          </optgroup>
+        </select>
+
+        <label for="favDate">Когда вы впервые познакомились с героем?</label>
+        <input type="date" id="favDate" name="favDate" />
+
+        <label><input type="checkbox" name="newsletter" value="yes" checked /> Подписаться на обновления сайта</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ваш отзыв</legend>
+
+        <label for="message">Сообщение:</label>
+        <textarea id="message" name="message" rows="5" placeholder="Поделитесь вашими мыслями..." maxlength="500" required></textarea>
+      </fieldset>
+
+      <button type="submit">Отправить отзыв</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 HeroWiki • Сайт сделал Клёсов Семён.</p>
+    <p>Обновлено: <time datetime="2025-10-07">7 октября 2025</time></p>
+  </footer>
+</body>
+</html>

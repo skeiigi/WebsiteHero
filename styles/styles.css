@@ -1,0 +1,297 @@
+
+/* 0) Палитра и токены дизайна */
+:root{
+  --bg:#0b1220;
+  --bg-elev:#111a2e;
+  --bg-veil: color-mix(in srgb, var(--bg) 85%, black 15%);
+
+  --fg:#e8edf7;
+  --muted:#9fb0d1;
+
+  --accent:#ffd166; /* Saul yellow */
+  --accent-2:#ef476f; /* Saul magenta/red */
+  --link:#ffd166;
+
+  --line:rgba(255,255,255,.08);
+  --shadow: 0 8px 24px rgba(0,0,0,.35);
+  --radius:14px;
+  --gap:.9rem;
+  --maxw:1100px;
+}
+
+/* 1) Сброс и базовые правила */
+*,
+*::before,
+*::after{ box-sizing:border-box; }
+html, body{ height:100%; }
+body, h1, h2, h3, h4, p, ul, ol, figure{ margin:0; }
+img, svg, video{ display:block; max-width:100%; height:auto; }
+
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family: system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Центровка основных потомков body + горизонтальные поля */
+body > *{
+  width:min(100%, var(--maxw));
+  margin-inline:auto;
+  padding-inline:clamp(.8rem, 2.2vw, 1.25rem);
+}
+
+/* Заголовки и типографика */
+h1{ font-size:clamp(1.9rem, 3vw, 2.5rem); line-height:1.2; letter-spacing:.3px; margin-block:1.2rem .6rem; }
+h2{ font-size:clamp(1.35rem, 2.2vw, 1.7rem); line-height:1.25; margin-block:1.2rem .4rem; }
+p{ margin-block:.75rem; }
+small{ color:var(--muted); }
+
+a{
+  color:var(--link);
+  text-decoration:none;
+  transition: color .2s ease, opacity .2s ease, background .2s ease, text-underline-offset .2s ease;
+}
+a:hover{ color:var(--accent-2); text-decoration: underline; text-underline-offset: .18em; text-decoration-thickness:.08em; }
+a:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:8px; }
+
+/* 2) Макет: Grid для основных регионов без изменения HTML */
+body{
+  display:grid;
+  grid-template-columns: 1fr minmax(280px,340px);
+  column-gap:clamp(1rem, 3vw, 2rem);
+  row-gap:1.25rem;
+}
+
+/* Широкие зоны на всю ширину */
+header, footer, section[aria-label], nav[aria-label="Хлебные крошки"]{ grid-column:1 / -1; }
+
+/* Основная колонка и сайдбар */
+main{ grid-column:1; padding-block:.5rem 1.25rem; }
+aside[aria-label]{ grid-column:2; align-self:start; }
+
+/* 3) Header + основная навигация */
+header{
+  position:sticky; top:0;
+  background:var(--bg-veil);
+  backdrop-filter: blur(6px);
+  border-bottom:1px solid var(--line);
+  padding-block:.6rem .7rem;
+  z-index:100;
+}
+
+/* Верхняя строка: логотип + link "пропуск к контенту" */
+header > a[href="/index.html"]{
+  display:inline-block;
+  margin-right:.75rem;
+  font-weight:800;
+  letter-spacing:.4px;
+  color:var(--fg);
+}
+/* Ссылка для быстрого перехода — показываем при фокусе клавиатурой */
+header > a[href="#main"]{
+  position:absolute;
+  left:-9999px;
+}
+header > a[href="#main"]:focus-visible{
+  position:static;
+  display:inline-block;
+  margin-left:.5rem;
+  padding:.25rem .5rem;
+  border-radius:8px;
+  background:rgba(255,255,255,.08);
+}
+
+/* Главное меню */
+header nav ul{
+  list-style:none;
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem .8rem;
+  padding:0;
+  margin:.6rem 0 0 0;
+}
+
+header nav a{
+  display:inline-block;
+  padding:.45rem .8rem;
+  border-radius:999px;
+  color:var(--fg);
+  background:transparent;
+  border:1px solid transparent;
+  opacity:.92;
+  position:relative;
+}
+header nav a:hover{
+  opacity:1;
+  background:rgba(255,255,255,.06);
+}
+/* Акцент текущей страницы через aria-current */
+header nav a[aria-current="page"]{
+  background:var(--accent);
+  color:#121212;
+  font-weight:700;
+  border-color:color-mix(in srgb, var(--accent) 70%, black 30%);
+}
+
+/* 4) Хлебные крошки */
+nav[aria-label="Хлебные крошки"]{
+  font-size:.95rem;
+  color:var(--muted);
+  margin-block:.4rem .2rem;
+}
+nav[aria-label="Хлебные крошки"] ul{
+  list-style:none;
+  padding:0;
+}
+nav[aria-label="Хлебные крошки"] li{ display:inline; }
+nav[aria-label="Хлебные крошки"] li + li::before{
+  content:" / ";
+  opacity:.7;
+}
+
+/* 5) Оглавление (внутри main) */
+nav[aria-label="Оглавление"]{
+  background:var(--bg-elev);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:1rem;
+  box-shadow:var(--shadow);
+  margin-block:1rem;
+}
+nav[aria-label="Оглавление"] ul{
+  list-style:none;
+  padding:0;
+  display:grid;
+  gap:.4rem .6rem;
+}
+nav[aria-label="Оглавление"] #content{
+  color:var(--muted);
+  margin-bottom:.4rem;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+
+/* 6) Основной контент */
+main header h1{
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  padding:.35rem .7rem;
+  background:linear-gradient(90deg, rgba(255,209,102,.12), rgba(239,71,111,.12));
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+
+/* Контентные секции как карточки */
+section{
+  background: color-mix(in srgb, var(--bg-elev) 85%, transparent 15%);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:1rem;
+  margin-block:1rem;
+  box-shadow: var(--shadow);
+}
+
+/* Акцентные полоски у главных секций */
+section#who-is{ border-left:4px solid var(--accent); }
+section#after-breaking-bad{ border-left:4px solid var(--accent-2); }
+
+/* Абзацы: читаемая ширина */
+main p{ max-width:70ch; }
+
+/* 7) Боковая колонка */
+aside[aria-label]{
+  background:var(--bg-elev);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:1rem;
+  box-shadow:var(--shadow);
+}
+figure{ margin:0; }
+figure img{
+  border-radius:calc(var(--radius) - 4px);
+  box-shadow:var(--shadow);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+figure img:hover{ transform:scale(1.03); }
+figcaption{
+  color:var(--muted);
+  font-size:.95rem;
+  text-align:center;
+  margin-top:.5rem;
+}
+
+/* 8) Вторичная навигация в секции */
+section > nav{
+  margin-top:.6rem;
+  display:flex;
+  gap:.6rem .8rem;
+  flex-wrap:wrap;
+  align-items:center;
+}
+section > nav p{ color:var(--muted); margin:0; }
+section > nav a{
+  display:inline-block;
+  padding:.5rem .9rem;
+  border-radius:10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:var(--fg);
+  transition: transform .15s ease;
+}
+section > nav a:hover{
+  background:var(--accent);
+  color:#111;
+  transform: translateY(-1px);
+}
+
+/* 9) Footer */
+footer{
+  margin-top:.5rem;
+  padding-block:1rem 1.5rem;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:.95rem;
+}
+
+/* 10) Состояния и доступность */
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation:none !important;
+    transition:none !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+
+/* 11) Декоративные детали */
+/* Подсветка ссылок меню снизу */
+header nav a::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:6px;
+  height:2px;
+  border-radius:2px;
+  background:transparent;
+  transition: background .2s ease, transform .2s ease;
+  transform: scaleX(0);
+  transform-origin:left;
+}
+header nav a:hover::after{
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: scaleX(1);
+}
+
+/* Тонкая декоративная сетка у секций */
+section{
+  background-image:
+    radial-gradient(ellipse at top left, rgba(255,255,255,.04), transparent 55%);
+  background-blend-mode: overlay;
+}
